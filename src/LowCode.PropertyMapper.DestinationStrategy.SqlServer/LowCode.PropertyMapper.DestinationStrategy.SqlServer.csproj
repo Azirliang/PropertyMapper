@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LowCode.PropertyMapper.Abstractions\LowCode.PropertyMapper.Abstractions.csproj" />
+    <ProjectReference Include="..\LowCode.PropertyMapper.DestinationStrategy.Abstractions\LowCode.PropertyMapper.DestinationStrategy.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

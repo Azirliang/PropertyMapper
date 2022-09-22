@@ -14,21 +14,57 @@ namespace LowCode.PropertyMapper.Test
 
             PropertyMapper<Class>.MapperClass(firstClass);
 
-            Assert.Equal("DEBUG:Remark", firstClass.Remark);
+            Assert.Equal("DEBUG:Name", firstClass.Remark);
+
+            foreach (var student in firstClass.Students)
+            {
+                Assert.Equal("DEBUG:Name", student.Remark);
+            }
+
+            foreach (var teacher in firstClass.Teachers)
+            {
+                Assert.Equal("DEBUG:Name", teacher.Remark);
+            }
 
             var lastClass = classCollection.Last();
 
             PropertyMapper<Class>.MapperClass(lastClass);
+
+            Assert.Equal("DEBUG:Name", lastClass.Remark);
+
+            foreach (var student in firstClass.Students)
+            {
+                Assert.Equal("DEBUG:Name", lastClass.Remark);
+            }
+
+            foreach (var teacher in firstClass.Teachers)
+            {
+                Assert.Equal("DEBUG:Name", lastClass.Remark);
+            }
 
         }
 
         [Fact]
         public void MapperList()
         {
-            var classCollection = FakeClass();
+            var classCollection = FakeClass().ToList();
 
-            PropertyMapper<Class>.MapperList(classCollection.ToList());
+            PropertyMapper<Class>.MapperList(classCollection);
 
+            foreach (var item in classCollection)
+            {
+                Assert.Equal("DEBUG:Name", item.Remark);
+
+                foreach (var student in item.Students)
+                {
+                    Assert.Equal("DEBUG:Name", student.Remark);
+                }
+
+                foreach (var teacher in item.Teachers)
+                {
+                    Assert.Equal("DEBUG:Name", teacher.Remark);
+                }
+            }
         }
 
         private IEnumerable<Class> FakeClass()
@@ -48,7 +84,7 @@ namespace LowCode.PropertyMapper.Test
             {
                 Name = "class1",
                 Remark = "°à¼¶1",
-                HeadMaster = teacher1,
+                //HeadMaster = teacher1,
                 Students = new List<Student> { student1, student2, student3 },
                 Teachers = new Teacher[] { teacher1, teacher2 }
             };

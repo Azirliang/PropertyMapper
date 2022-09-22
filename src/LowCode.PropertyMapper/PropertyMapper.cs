@@ -8,7 +8,7 @@ namespace LowCode.PropertyMapper
     public class PropertyMapper<TSource>
     //: IPropertyMapper<TSource> where TSource : class
     {
-        private readonly static Action<TSource> MapperClassCache = MapperCalss();
+        public readonly static Action<TSource> MapperClassCache = MapperCalss();
 
         public static void MapperClass(TSource source) => MapperClassCache(source);
 
@@ -16,7 +16,7 @@ namespace LowCode.PropertyMapper
         {
             foreach (var source in sources)
             {
-                MapperClassCache(source);
+                MapperClass(source);
             }
         }
 
@@ -50,13 +50,12 @@ namespace LowCode.PropertyMapper
 
                 if (sourceTypePropertyInfo.PropertyType.IsValueType == true || sourceTypePropertyInfo.PropertyType == typeof(string))
                 {
-                    //TODO: 处理Value的值转换
                     Expression destinationValue;
 
 #if DEBUG
                     destinationValue = Expression.Constant($"DEBUG:{nameof(sourceTypePropertyInfo.Name)}");
 #else
-
+                    //TODO: 处理Value的值转换
                     destinationValue = Expression.Constant(sourceTypeProperty);
 #endif
 
@@ -69,7 +68,7 @@ namespace LowCode.PropertyMapper
                     continue;
                 }
 
-                if (sourceTypePropertyInfo.PropertyType.IsClass && sourceTypePropertyInfo.PropertyType.IsGenericType == false)
+                if (sourceTypePropertyInfo.PropertyType.IsClass && !sourceTypePropertyInfo.PropertyType.IsArray && sourceTypePropertyInfo.PropertyType.IsGenericType == false)
                 {
                     Expression classMapperExpression = ClassMapperExpression(sourceTypeProperty, sourceTypePropertyInfo.PropertyType);
 
@@ -105,7 +104,9 @@ namespace LowCode.PropertyMapper
 
             var ifTrue = Expression.Call(propertyMapperType.GetMethod(nameof(MapperClass), new[] { classType })!, classProperty);
 
-            var conditionExpression = Expression.Condition(condition, ifTrue, Expression.Constant(null, classType));
+            var ifFalse = Expression.Assign(classProperty, Expression.Constant(null, classType));
+
+            var conditionExpression = Expression.Condition(condition, ifTrue, ifFalse, typeof(void));
 
             return conditionExpression;
         }
@@ -118,8 +119,6 @@ namespace LowCode.PropertyMapper
 
             var propertyMapperType = typeof(PropertyMapper<>).MakeGenericType(listItemType!);
 
-            var callMapperListExpression = Expression.Call(propertyMapperType.GetMethod(nameof(MapperList), new[] { listType })!, listProperty);
-
             Expression ifTrue;
 
             if (typeof(IDictionary).IsAssignableFrom(listType))
@@ -129,10 +128,12 @@ namespace LowCode.PropertyMapper
             }
             else
             {
-                ifTrue = callMapperListExpression;
+                ifTrue = Expression.Call(propertyMapperType.GetMethod(nameof(MapperList), new[] { listType })!, listProperty); ;
             }
 
-            var conditionItem = Expression.Condition(condition, ifTrue, Expression.Constant(null, listType));
+            var ifFalse = Expression.Assign(listProperty, Expression.Constant(null, listType));
+
+            var conditionItem = Expression.Condition(condition, ifTrue, ifFalse, typeof(void));
 
             return conditionItem;
         }
