@@ -1,10 +1,31 @@
 using LowCode.PropertyMapper.Test.Fake;
-using System.Globalization;
+using Newtonsoft.Json;
 
 namespace LowCode.PropertyMapper.Test
 {
     public class PropertyMapperTest
     {
+        [Fact]
+        public void SystemText()
+        {
+            var classCollection = FakeClass();
+
+            var class2 = classCollection.Last();
+
+            Assert.Throws<System.Text.Json.JsonException>(() => { System.Text.Json.JsonSerializer.Serialize(class2); });
+        }
+
+        [Fact]
+        public void NewtonSoft()
+        {
+            var classCollection = FakeClass();
+
+            var class2 = classCollection.Last();
+
+            Assert.Throws<JsonSerializationException>(() => { JsonConvert.SerializeObject(class2); });
+        }
+
+
         [Fact]
         public void MapperClass()
         {
@@ -26,6 +47,10 @@ namespace LowCode.PropertyMapper.Test
                 Assert.Equal("DEBUG:Name", teacher.Remark);
             }
 
+            Assert.Null(firstClass.Self);
+
+            Assert.Null(firstClass.NextClass);
+
             var lastClass = classCollection.Last();
 
             PropertyMapper<Class>.MapperClass(lastClass);
@@ -34,13 +59,21 @@ namespace LowCode.PropertyMapper.Test
 
             foreach (var student in firstClass.Students)
             {
-                Assert.Equal("DEBUG:Name", lastClass.Remark);
+                Assert.Equal("DEBUG:Name", student.Remark);
             }
 
             foreach (var teacher in firstClass.Teachers)
             {
-                Assert.Equal("DEBUG:Name", lastClass.Remark);
+                Assert.Equal("DEBUG:Name", teacher.Remark);
             }
+
+            Assert.NotNull(lastClass.Self);
+
+            Assert.NotNull(lastClass.NextClass);
+
+            Assert.Equal(firstClass, lastClass.NextClass);
+
+            Assert.Equal(lastClass, lastClass.Self);
 
         }
 
@@ -84,7 +117,6 @@ namespace LowCode.PropertyMapper.Test
             {
                 Name = "class1",
                 Remark = "°à¼¶1",
-                //HeadMaster = teacher1,
                 Students = new List<Student> { student1, student2, student3 },
                 Teachers = new Teacher[] { teacher1, teacher2 }
             };
@@ -97,8 +129,11 @@ namespace LowCode.PropertyMapper.Test
                 Remark = "°à¼¶2",
                 HeadMaster = teacher2,
                 Students = new List<Student> { student4, student5, student6 },
-                Teachers = new Teacher[] { teacher1, teacher3 }
+                Teachers = new Teacher[] { teacher1, teacher3 },
+                NextClass = class1
             };
+
+            class2.Self = class2;
 
             yield return class2;
         }

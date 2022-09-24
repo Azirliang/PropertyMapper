@@ -14,5 +14,9 @@ namespace LowCode.PropertyMapper.Test.Fake
         public IEnumerable<Student> Students { get; set; }
 
         public Teacher[] Teachers { get; set; }
+
+        public Class NextClass { get; set; }
+
+        public Class Self { get; set; }
     }
 }
