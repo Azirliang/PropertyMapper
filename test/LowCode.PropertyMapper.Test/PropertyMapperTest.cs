@@ -29,7 +29,7 @@ namespace LowCode.PropertyMapper.Test
         [Fact]
         public void MapperClass()
         {
-            var classCollection = FakeClass();
+            var classCollection = FakeClass().ToList();
 
             var firstClass = classCollection.First();
 
